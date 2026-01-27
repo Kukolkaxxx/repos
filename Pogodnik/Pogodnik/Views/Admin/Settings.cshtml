@@ -1,0 +1,239 @@
+﻿@page
+@model Pogodnik.Pages.Admin.SettingsModel
+@{
+    // Устанавливаем заголовок здесь, чтобы он всегда был установлен
+    ViewData["Title"] = "Настройки";
+}
+
+<div class="container-fluid mt-4">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-sliders-h me-2"></i>Настройки сервиса</h1>
+                <a asp-page="/Admin/Index" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-1"></i>Назад в админку
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Настройки API -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-key me-2"></i>Настройки API</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.ApiSettings != null)
+                    {
+                        <form method="post" asp-page-handler="SaveApiSettings">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                            <div class="mb-3">
+                                <label class="form-label" asp-for="ApiSettings.ApiKey">OpenWeatherMap API Key</label>
+                                <input type="password" class="form-control"
+                                       asp-for="ApiSettings.ApiKey"
+                                       value="****************" readonly>
+                                <div class="form-text">
+                                    API ключ защищен. Для изменения обратитесь к системному администратору.
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label" asp-for="ApiSettings.Units">Единицы измерения</label>
+                                <select class="form-select" asp-for="ApiSettings.Units">
+                                    <option value="metric">Метрические (°C, м/с)</option>
+                                    <option value="imperial">Имперские (°F, мили/ч)</option>
+                                    <option value="standard">Стандартные (К, м/с)</option>
+                                </select>
+                                <span asp-validation-for="ApiSettings.Units" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label" asp-for="ApiSettings.Language">Язык</label>
+                                <select class="form-select" asp-for="ApiSettings.Language">
+                                    <option value="ru">Русский</option>
+                                    <option value="en">English</option>
+                                    <option value="fr">Français</option>
+                                    <option value="de">Deutsch</option>
+                                </select>
+                                <span asp-validation-for="ApiSettings.Language" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" asp-for="ApiSettings.EnableCaching">
+                                <label class="form-check-label" asp-for="ApiSettings.EnableCaching">Включить кэширование</label>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label" asp-for="ApiSettings.CacheDuration">Время жизни кэша (минуты)</label>
+                                <input type="number" class="form-control" asp-for="ApiSettings.CacheDuration" min="1" max="1440">
+                                <span asp-validation-for="ApiSettings.CacheDuration" class="text-danger"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Сохранить настройки
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            Настройки API не загружены. Пожалуйста, обновите страницу.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Настройки системы -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Настройки системы</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.SystemSettings != null)
+                    {
+                        <form method="post" asp-page-handler="SaveSystemSettings">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                            <div class="mb-3">
+                                <label class="form-label" asp-for="SystemSettings.SiteName">Название сайта</label>
+                                <input type="text" class="form-control" asp-for="SystemSettings.SiteName">
+                                <span asp-validation-for="SystemSettings.SiteName" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label" asp-for="SystemSettings.SiteDescription">Описание сайта</label>
+                                <textarea class="form-control" rows="3" asp-for="SystemSettings.SiteDescription"></textarea>
+                                <span asp-validation-for="SystemSettings.SiteDescription" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label" asp-for="SystemSettings.DefaultCity">Город по умолчанию</label>
+                                <input type="text" class="form-control" asp-for="SystemSettings.DefaultCity">
+                                <span asp-validation-for="SystemSettings.DefaultCity" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label" asp-for="SystemSettings.SearchHistoryLimit">Лимит истории поиска</label>
+                                <input type="number" class="form-control" asp-for="SystemSettings.SearchHistoryLimit" min="10" max="1000">
+                                <span asp-validation-for="SystemSettings.SearchHistoryLimit" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label" asp-for="SystemSettings.MaxFavorites">Максимальное количество избранных</label>
+                                <input type="number" class="form-control" asp-for="SystemSettings.MaxFavorites" min="5" max="100">
+                                <span asp-validation-for="SystemSettings.MaxFavorites" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" asp-for="SystemSettings.EnableRegistration">
+                                <label class="form-check-label" asp-for="SystemSettings.EnableRegistration">Разрешить регистрацию</label>
+                            </div>
+
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" asp-for="SystemSettings.EnableNotifications">
+                                <label class="form-check-label" asp-for="SystemSettings.EnableNotifications">Включить уведомления</label>
+                            </div>
+
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-2"></i>Сохранить настройки
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            Системные настройки не загружены. Пожалуйста, обновите страницу.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Очистка данных -->
+        <div class="col-12 mb-4">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Опасные настройки</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>Внимание!</strong> Эти действия нельзя отменить.
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <form method="post" asp-page-handler="ClearAllSearchHistory" id="clearHistoryForm" style="display: none;">
+                                @Html.AntiForgeryToken()
+                            </form>
+                            <button type="button" class="btn btn-outline-danger w-100" onclick="clearSearchHistory()">
+                                <i class="fas fa-trash me-2"></i>Очистить историю поиска
+                            </button>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <form method="post" asp-page-handler="ClearAllFavorites" id="clearFavoritesForm" style="display: none;">
+                                @Html.AntiForgeryToken()
+                            </form>
+                            <button type="button" class="btn btn-outline-danger w-100" onclick="clearAllFavorites()">
+                                <i class="fas fa-star me-2"></i>Очистить все избранное
+                            </button>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <form method="post" asp-page-handler="ResetSettings" id="resetSettingsForm" style="display: none;">
+                                @Html.AntiForgeryToken()
+                            </form>
+                            <button type="button" class="btn btn-outline-danger w-100" onclick="resetSettings()">
+                                <i class="fas fa-undo me-2"></i>Сбросить настройки
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function clearSearchHistory() {
+            if (confirm('Вы уверены? Вся история поиска будет удалена безвозвратно.')) {
+                document.getElementById('clearHistoryForm').submit();
+            }
+        }
+
+        function clearAllFavorites() {
+            if (confirm('Вы уверены? Все избранные города будут удалены.')) {
+                document.getElementById('clearFavoritesForm').submit();
+            }
+        }
+
+        function resetSettings() {
+            if (confirm('Вы уверены? Все настройки будут сброшены к значениям по умолчанию.')) {
+                document.getElementById('resetSettingsForm').submit();
+            }
+        }
+    </script>
+}

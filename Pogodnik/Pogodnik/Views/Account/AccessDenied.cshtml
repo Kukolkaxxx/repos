@@ -1,0 +1,59 @@
+﻿@page
+@model Pogodnik.Views.Account.AccessDeniedModel
+@{
+    ViewData["Title"] = "Доступ запрещен";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-danger">
+                <div class="card-header bg-danger text-white text-center py-4">
+                    <i class="fas fa-ban fa-4x mb-3"></i>
+                    <h1 class="card-title mb-0">Доступ запрещен</h1>
+                </div>
+                <div class="card-body text-center p-5">
+                    <h3 class="mb-4">У вас нет прав для доступа к этой странице</h3>
+                    <p class="lead mb-4">
+                        Для доступа к админ-панели необходимо войти в систему с правами администратора.
+                    </p>
+
+                    <div class="d-grid gap-3 col-md-8 mx-auto">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <a href="/" class="btn btn-primary btn-lg">
+                                <i class="fas fa-home me-2"></i>На главную
+                            </a>
+                            <form asp-controller="Account" asp-action="Logout" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-danger btn-lg">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Выйти
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a href="/Account/Login" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Войти в систему
+                            </a>
+                            <a href="/" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-home me-2"></i>На главную
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        border-bottom: none;
+    }
+</style>

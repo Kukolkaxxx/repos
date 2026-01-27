@@ -1,0 +1,429 @@
+﻿/* Анимации для погодных иконок */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes bounce {
+    0%, 20%, 60%, 100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-10px);
+    }
+
+    80% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% center;
+    }
+
+    100% {
+        background-position: 200% center;
+    }
+}
+
+@keyframes rain {
+    0% {
+        background-position: 0% 0%;
+    }
+
+    100% {
+        background-position: 0% 100%;
+    }
+}
+
+@keyframes snow {
+    0% {
+        background-position: 0% 0%;
+    }
+
+    100% {
+        background-position: 0% 100%;
+    }
+}
+
+/* Анимации для конкретных погодных условий */
+.weather-icon-sunny {
+    animation: float 3s ease-in-out infinite, pulse 2s ease-in-out infinite 1s;
+}
+
+.weather-icon-cloudy {
+    animation: float 4s ease-in-out infinite;
+}
+
+.weather-icon-rainy {
+    animation: rain 1s linear infinite;
+    position: relative;
+}
+
+    .weather-icon-rainy::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom, transparent 30%, rgba(0, 150, 255, 0.3) 70%);
+        animation: rain 0.5s linear infinite;
+    }
+
+.weather-icon-snowy {
+    animation: snow 2s linear infinite;
+    position: relative;
+}
+
+    .weather-icon-snowy::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 20%, white 2px, transparent 3px), radial-gradient(circle at 60% 40%, white 2px, transparent 3px), radial-gradient(circle at 80% 70%, white 2px, transparent 3px);
+        background-size: 100px 100px;
+        animation: snow 3s linear infinite;
+    }
+
+.weather-icon-thunderstorm {
+    animation: pulse 0.5s infinite alternate;
+    position: relative;
+}
+
+    .weather-icon-thunderstorm::before {
+        content: '⚡';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 2em;
+        animation: spin 2s linear infinite;
+    }
+
+.weather-icon-windy {
+    animation: spin 4s linear infinite;
+}
+
+/* Анимации для элементов интерфейса */
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease;
+}
+
+    .animate-on-scroll.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+.hover-grow {
+    transition: transform 0.3s ease;
+}
+
+    .hover-grow:hover {
+        transform: scale(1.05);
+    }
+
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+/* Анимация загрузки */
+.loading-spinner {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-dots {
+    display: inline-block;
+}
+
+    .loading-dots::after {
+        content: '...';
+        animation: dotAnimation 1.5s infinite;
+    }
+
+@keyframes dotAnimation {
+    0%, 20% {
+        content: '.';
+    }
+
+    40% {
+        content: '..';
+    }
+
+    60%, 100% {
+        content: '...';
+    }
+}
+
+/* Анимация появления карточек с задержкой */
+.stagger-animate > * {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+    .stagger-animate > *:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .stagger-animate > *:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .stagger-animate > *:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .stagger-animate > *:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    .stagger-animate > *:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+
+    .stagger-animate > *:nth-child(6) {
+        animation-delay: 0.6s;
+    }
+
+    .stagger-animate > *:nth-child(7) {
+        animation-delay: 0.7s;
+    }
+
+/* Анимация градиента */
+.gradient-animate {
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Анимация параллакса */
+.parallax {
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+/* Анимация для температуры */
+.temperature-change {
+    transition: color 0.5s ease;
+}
+
+    .temperature-change.warming {
+        color: #ff6b6b;
+        animation: pulse 0.5s ease;
+    }
+
+    .temperature-change.cooling {
+        color: #4d96ff;
+        animation: pulse 0.5s ease;
+    }
+
+/* Анимация для ветра */
+.wind-arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+/* Анимация для восхода/заката */
+.sun-animation {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+    .sun-animation::before {
+        content: '☀️';
+        position: absolute;
+        font-size: 3em;
+        animation: sunPath 10s linear infinite;
+    }
+
+@keyframes sunPath {
+    0% {
+        left: 0;
+        top: 100%;
+        opacity: 0;
+    }
+
+    25% {
+        left: 25%;
+        top: 50%;
+        opacity: 0.7;
+    }
+
+    50% {
+        left: 50%;
+        top: 0;
+        opacity: 1;
+    }
+
+    75% {
+        left: 75%;
+        top: 50%;
+        opacity: 0.7;
+    }
+
+    100% {
+        left: 100%;
+        top: 100%;
+        opacity: 0;
+    }
+}
+
+/* Анимация для облаков */
+.cloud {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    animation: cloudFloat 20s linear infinite;
+}
+
+    .cloud:nth-child(1) {
+        width: 60px;
+        height: 20px;
+        top: 20%;
+        left: 10%;
+        animation-delay: 0s;
+    }
+
+    .cloud:nth-child(2) {
+        width: 100px;
+        height: 35px;
+        top: 40%;
+        left: 30%;
+        animation-delay: 5s;
+    }
+
+    .cloud:nth-child(3) {
+        width: 80px;
+        height: 25px;
+        top: 60%;
+        left: 60%;
+        animation-delay: 10s;
+    }
+
+@keyframes cloudFloat {
+    0% {
+        transform: translateX(-100px);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateX(calc(100vw + 100px));
+        opacity: 0;
+    }
+}
+
+/* Медиа-запросы для анимаций */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

@@ -1,0 +1,463 @@
+﻿@model Pogodnik.Models.ViewModels.CurrentWeatherViewModel
+@{
+    ViewData["Title"] = "Погода в Воронеже";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Заголовок с навигацией -->
+            <div class="text-center mb-4">
+                <h1 class="display-4 text-primary mb-3">🌤️ Pogodnik</h1>
+                <p class="lead">Актуальная погода в вашем городе</p>
+
+                <div class="btn-group mt-3" role="group">
+                    <a href="/" class="btn btn-outline-primary active">
+                        <i class="fas fa-sun"></i> Текущая погода
+                    </a>
+                    <a href="/Forecast" class="btn btn-outline-primary">
+                        <i class="fas fa-calendar-alt"></i> Прогноз на 7 дней
+                    </a>
+                </div>
+            </div>
+
+            <!-- Форма поиска -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="post" asp-action="GetWeather" id="weatherForm" class="row g-3">
+                        <div class="col-md-9">
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" name="city" class="form-control"
+                                       placeholder="Введите название города (например: Москва, London, Paris)..."
+                                       value="@(Model?.CityName ?? "Воронеж")" required
+                                       id="citySearch">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="fas fa-search"></i> Найти погоду
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Быстрые города -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-outline-secondary quick-city" data-city="Москва">
+                            <i class="fas fa-city"></i> Москва
+                        </button>
+                        <button class="btn btn-outline-secondary quick-city" data-city="Санкт-Петербург">
+                            <i class="fas fa-city"></i> Санкт-Петербург
+                        </button>
+                        <button class="btn btn-outline-secondary quick-city" data-city="Новосибирск">
+                            <i class="fas fa-city"></i> Новосибирск
+                        </button>
+                        <button class="btn btn-outline-secondary quick-city" data-city="Екатеринбург">
+                            <i class="fas fa-city"></i> Екатеринбург
+                        </button>
+                        <button class="btn btn-outline-secondary quick-city" data-city="London">
+                            <i class="fas fa-city"></i> London
+                        </button>
+                        <button class="btn btn-outline-secondary quick-city" data-city="Paris">
+                            <i class="fas fa-city"></i> Paris
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карточка админки для администраторов -->
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-crown fa-2x me-3"></i>
+                                <div class="flex-grow-1">
+                                    <h5 class="alert-heading mb-1">Добро пожаловать, администратор!</h5>
+                                    <p class="mb-0">У вас есть доступ к админ-панели. <a href="/Admin" class="alert-link">Перейти в админку</a></p>
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Сообщение об ошибке -->
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    @ViewBag.Error
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Индикатор загрузки -->
+            <div id="loading" class="text-center d-none">
+                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+                <p class="mt-3">Получаем данные о погоде...</p>
+            </div>
+
+            <!-- Отображение погоды -->
+            @if (Model != null)
+            {
+                <div class="card weather-card shadow-lg border-0 animate__animated animate__fadeIn">
+                    <div class="card-header bg-gradient-primary text-white py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h2 class="card-title mb-0">
+                                    <i class="fas fa-city me-2"></i>
+                                    @Model.CityName, @Model.Country
+                                    <button class="btn btn-sm btn-outline-light ms-2 favorite-btn"
+                                            data-city="@Model.CityName"
+                                            data-country="@Model.Country"
+                                            title="Добавить в избранное">
+                                        <i class="far fa-star"></i>
+                                    </button>
+                                </h2>
+                            </div>
+                            <div>
+                                <span class="badge bg-light text-dark">
+                                    <i class="fas fa-sync-alt me-1"></i>
+                                    Обновлено: @Model.LastUpdated.ToString("HH:mm")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <!-- Основная информация -->
+                            <div class="col-lg-6 text-center">
+                                <div class="display-1 fw-bold mb-3 temperature">
+                                    @Math.Round(Model.Temperature)°C
+                                </div>
+                                <div class="weather-icon-container mb-4">
+                                    <img src="https://openweathermap.org/img/wn/@(Model.Icon)@@4x.png"
+                                         alt="@Model.Description"
+                                         class="weather-icon-large animate__animated animate__pulse">
+                                    <h3 class="text-capitalize mt-3">@Model.Description</h3>
+                                    <p class="text-muted fs-5">
+                                        Ощущается как: <strong>@Math.Round(Model.FeelsLike)°C</strong>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Детали погоды -->
+                            <div class="col-lg-6">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="weather-detail-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+                                            <div class="detail-icon">
+                                                <i class="fas fa-tint fa-2x"></i>
+                                            </div>
+                                            <div class="detail-content">
+                                                <div class="detail-label">Влажность</div>
+                                                <div class="detail-value">@Model.Humidity%</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="weather-detail-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                                            <div class="detail-icon">
+                                                <i class="fas fa-tachometer-alt fa-2x"></i>
+                                            </div>
+                                            <div class="detail-content">
+                                                <div class="detail-label">Давление</div>
+                                                <div class="detail-value">@Model.Pressure гПа</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="weather-detail-card animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
+                                            <div class="detail-icon">
+                                                <i class="fas fa-wind fa-2x"></i>
+                                            </div>
+                                            <div class="detail-content">
+                                                <div class="detail-label">Ветер</div>
+                                                <div class="detail-value">
+                                                    @Model.WindSpeed м/с
+                                                    <div class="wind-direction">
+                                                        <i class="fas fa-long-arrow-alt-up"
+                                                           style="transform: rotate(@(Model.WindDirection + 180)deg)"></i>
+                                                        @Model.WindDirectionText
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="weather-detail-card animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
+                                            <div class="detail-icon">
+                                                <i class="fas fa-sun fa-2x"></i>
+                                            </div>
+                                            <div class="detail-content">
+                                                <div class="detail-label">Восход / Закат</div>
+                                                <div class="detail-value">
+                                                    <div class="sun-time">
+                                                        <i class="fas fa-sunrise me-2"></i>@Model.Sunrise.ToString("HH:mm")
+                                                    </div>
+                                                    <div class="sun-time">
+                                                        <i class="fas fa-sunset me-2"></i>@Model.Sunset.ToString("HH:mm")
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-light py-3">
+                        <div class="row text-center">
+                            <div class="col">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Данные предоставлены OpenWeatherMap •
+                                    <a href="/Forecast?city=@Model.CityName" class="text-decoration-none">
+                                        <i class="fas fa-calendar-alt ms-2 me-1"></i>Прогноз на 7 дней
+                                    </a>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Сообщение при отсутствии данных -->
+                <div class="text-center py-5 animate__animated animate__fadeIn">
+                    <i class="fas fa-cloud-sun fa-5x text-muted mb-4"></i>
+                    <h3>Добро пожаловать в Pogodnik!</h3>
+                    <p class="text-muted mb-4">Введите название города в поле выше, чтобы увидеть погоду</p>
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5>Популярные города:</h5>
+                                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                                        <a href="/?city=Москва" class="btn btn-outline-primary btn-sm">Москва</a>
+                                        <a href="/?city=Санкт-Петербург" class="btn btn-outline-primary btn-sm">Санкт-Петербург</a>
+                                        <a href="/?city=London" class="btn btn-outline-primary btn-sm">London</a>
+                                        <a href="/?city=Paris" class="btn btn-outline-primary btn-sm">Paris</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .weather-card {
+        border-radius: 20px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .weather-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+    .weather-icon-large {
+        width: 150px;
+        height: 150px;
+        filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .temperature {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: transparent;
+        background-clip: text;
+        -webkit-background-clip: text;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .weather-detail-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        height: 100%;
+        border: 1px solid #dee2e6;
+    }
+
+        .weather-detail-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+        }
+
+    .detail-icon {
+        color: #0d6efd;
+        margin-right: 15px;
+        width: 50px;
+        text-align: center;
+    }
+
+    .detail-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .detail-value {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #212529;
+    }
+
+    .wind-direction {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+
+    .sun-time {
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .quick-city:hover {
+        transform: translateY(-2px);
+        transition: transform 0.2s;
+    }
+
+    /* keyframes нужно определять в CSS файле, но для простоты добавим здесь */
+    @@keyframes float {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    @@keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    /* Адаптивность */
+    @@media (max-width: 768px) {
+        .display-1 {
+            font-size: 4rem;
+        }
+
+        .weather-icon-large {
+            width: 100px;
+            height: 100px;
+        }
+
+        .weather-detail-card {
+            padding: 15px;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script src="~/js/favorites.js" asp-append-version="true"></script>
+    <script>
+        // Показываем индикатор загрузки при отправке формы
+        document.getElementById('weatherForm')?.addEventListener('submit', function() {
+            document.getElementById('loading').classList.remove('d-none');
+        });
+
+        // Автодополнение при вводе
+        document.addEventListener('DOMContentLoaded', function() {
+            const cityInput = document.getElementById('citySearch');
+            if (cityInput) {
+                cityInput.focus();
+
+                // Автодополнение популярных городов
+                cityInput.addEventListener('input', function(e) {
+                    const value = e.target.value.toLowerCase();
+                    if (value.length > 1) {
+                        // Здесь можно добавить вызов API для автодополнения
+                    }
+                });
+            }
+
+            // Кнопки быстрого выбора городов
+            document.querySelectorAll('.quick-city').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const city = this.getAttribute('data-city');
+                    document.getElementById('citySearch').value = city;
+                    document.getElementById('weatherForm').submit();
+                });
+            });
+
+            // Инициализация избранного
+            const favoriteBtn = document.querySelector('.favorite-btn');
+            if (favoriteBtn) {
+                const city = favoriteBtn.getAttribute('data-city');
+                const country = favoriteBtn.getAttribute('data-country');
+
+                // Проверяем, есть ли город в избранном
+                const favorites = JSON.parse(localStorage.getItem('weatherFavorites') || '[]');
+                const isFavorite = favorites.some(fav =>
+                    fav.city === city && fav.country === country);
+
+                if (isFavorite) {
+                    favoriteBtn.innerHTML = '<i class="fas fa-star"></i>';
+                    favoriteBtn.classList.add('active');
+                    favoriteBtn.title = "Удалить из избранного";
+                }
+
+                favoriteBtn.addEventListener('click', function() {
+                    const city = this.getAttribute('data-city');
+                    const country = this.getAttribute('data-country');
+
+                    if (window.favoritesManager) {
+                        if (window.favoritesManager.isFavorite(city, country)) {
+                            window.favoritesManager.removeFavorite(city, country);
+                            this.innerHTML = '<i class="far fa-star"></i>';
+                            this.classList.remove('active');
+                            this.title = "Добавить в избранное";
+                        } else {
+                            window.favoritesManager.addFavorite(city, country);
+                            this.innerHTML = '<i class="fas fa-star"></i>';
+                            this.classList.add('active');
+                            this.title = "Удалить из избранного";
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}

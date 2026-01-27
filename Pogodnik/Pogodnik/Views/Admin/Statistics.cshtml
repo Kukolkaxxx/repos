@@ -1,0 +1,120 @@
+﻿@page
+@model Pogodnik.Views.Admin.StatisticsModel
+@{
+    ViewData["Title"] = "Статистика";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-chart-bar me-2"></i>Статистика сервиса</h1>
+                <a href="@Url.Action("Index")" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-1"></i>Назад
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Общая статистика -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-search me-2"></i>Общие показатели</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <h1 class="display-1 text-primary">@ViewBag.TotalSearches</h1>
+                        <p class="lead">Всего поисков</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Популярные города -->
+        <div class="col-md-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-city me-2"></i>Популярные города</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Город</th>
+                                    <th>Страна</th>
+                                    <th>Последний поиск</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.PopularCities != null)
+                                {
+                                    var index = 1;
+                                    foreach (var city in ViewBag.PopularCities as List<Pogodnik.Data.Entities.SearchHistory>)
+                                    {
+                                        <tr>
+                                            <td>@index</td>
+                                            <td>@city.CityName</td>
+                                            <td><span class="badge bg-secondary">@city.CountryCode</span></td>
+                                            <td>@city.SearchedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                                        </tr>
+                                        index++;
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Последние поиски -->
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Последние поиски (20)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Время</th>
+                                    <th>Город</th>
+                                    <th>Страна</th>
+                                    <th>Температура</th>
+                                    <th>Погода</th>
+                                    <th>Пользователь</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.RecentSearches != null)
+                                {
+                                    foreach (var search in ViewBag.RecentSearches as List<Pogodnik.Data.Entities.SearchHistory>)
+                                    {
+                                        <tr>
+                                            <td>@search.SearchedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                                            <td>@search.CityName</td>
+                                            <td><span class="badge bg-secondary">@search.CountryCode</span></td>
+                                            <td>
+                                                @if (search.Temperature.HasValue)
+                                                {
+                                                    <span class="badge bg-primary">@Math.Round(search.Temperature.Value)°C</span>
+                                                }
+                                            </td>
+                                            <td>@search.WeatherDescription</td>
+                                            <td><small class="text-muted">@search.UserId</small></td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

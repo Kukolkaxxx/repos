@@ -1,0 +1,342 @@
+﻿@model Pogodnik.Models.ViewModels.ForecastResponseViewModel
+@{
+    ViewData["Title"] = "Прогноз погоды";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
+            <!-- Заголовок с навигацией -->
+            <div class="text-center mb-4">
+                <h1 class="display-4 text-primary mb-3">📅 Прогноз на 7 дней</h1>
+                <p class="lead">Подробный прогноз погоды</p>
+                
+                <div class="btn-group mt-3" role="group">
+                    <a href="/" class="btn btn-outline-primary">
+                        <i class="fas fa-sun"></i> Текущая погода
+                    </a>
+                    <a href="/Forecast" class="btn btn-outline-primary active">
+                        <i class="fas fa-calendar-alt"></i> Прогноз на 7 дней
+                    </a>
+                </div>
+            </div>
+
+            <!-- Форма поиска -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="post" asp-action="GetForecast" id="forecastForm" class="row g-3">
+                        <div class="col-md-9">
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" name="city" class="form-control" 
+                                       placeholder="Введите название города для прогноза..." 
+                                       value="@(Model?.CityName ?? "Воронеж")" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="fas fa-search"></i> Найти прогноз
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    @ViewBag.Error
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (Model?.Forecasts != null && Model.Forecasts.Any())
+            {
+                <div class="card shadow-lg border-0 mb-4">
+                    <div class="card-header bg-gradient-primary text-white py-3">
+                        <h2 class="card-title mb-0">
+                            <i class="fas fa-city me-2"></i> 
+                            @Model.CityName, @Model.Country
+                            <small class="ms-2">Прогноз на 7 дней</small>
+                        </h2>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="row">
+                            @foreach (var forecast in Model.Forecasts)
+                            {
+                                <div class="col-md-4 col-lg-3 mb-4">
+                                    <div class="card forecast-card h-100 shadow-sm border-0 animate__animated animate__fadeInUp"
+                                         style="animation-delay: @(0.1 * Model.Forecasts.IndexOf(forecast))s">
+                                        <div class="card-header bg-info text-white text-center py-3">
+                                            <h5 class="mb-1">@forecast.DayOfWeekShort</h5>
+                                            <small class="opacity-75">@forecast.FormattedDate</small>
+                                        </div>
+                                        <div class="card-body text-center">
+                                            <img src="https://openweathermap.org/img/wn/@(forecast.Icon)@@2x.png" 
+                                                 alt="@forecast.Description" 
+                                                 class="img-fluid mb-3 forecast-icon"
+                                                 style="max-width: 80px;">
+                                            <div class="mb-3">
+                                                <div class="display-6 fw-bold temperature-gradient">
+                                                    @Math.Round(forecast.Temperature)°C
+                                                </div>
+                                                <div class="text-capitalize">@forecast.Description</div>
+                                            </div>
+                                            
+                                            <div class="row small text-muted mb-3">
+                                                <div class="col-6">
+                                                    <div class="temp-min">
+                                                        <i class="fas fa-thermometer-empty"></i>
+                                                        @Math.Round(forecast.TemperatureMin)°
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="temp-max">
+                                                        <i class="fas fa-thermometer-full"></i>
+                                                        @Math.Round(forecast.TemperatureMax)°
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row small">
+                                                <div class="col-6">
+                                                    <div class="mb-2">
+                                                        <i class="fas fa-tint text-primary"></i>
+                                                        <div>@forecast.Humidity%</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="mb-2">
+                                                        <i class="fas fa-wind text-primary"></i>
+                                                        <div>@forecast.WindSpeed м/с</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-light text-center">
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar-day me-1"></i>
+                                                @forecast.DayOfWeek
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        
+                    </div>
+                </div>
+            }
+            else if (Model == null && ViewBag.Error == null)
+            {
+                <!-- Сообщение при отсутствии данных -->
+                <div class="text-center py-5 animate__animated animate__fadeIn">
+                    <i class="fas fa-calendar-alt fa-5x text-muted mb-4"></i>
+                    <h3>Прогноз погоды</h3>
+                    <p class="text-muted mb-4">Введите название города, чтобы увидеть прогноз на 7 дней</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .forecast-card {
+        transition: all 0.3s ease;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .forecast-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+    
+    .forecast-icon {
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    .temperature-gradient {
+        background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+        color: transparent;
+        background-clip: text;
+        -webkit-background-clip: text;
+    }
+    
+    .temp-min {
+        color: #0dcaf0;
+        font-weight: 500;
+    }
+    
+    .temp-max {
+        color: #fd7e14;
+        font-weight: 500;
+    }
+    
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    @@keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+    
+    /* Адаптивность */
+    @@media (max-width: 768px) {
+        .col-md-4 {
+            flex: 0 0 50%;
+            max-width: 50%;
+        }
+        
+        .display-6 {
+            font-size: 1.5rem;
+        }
+    }
+    
+    @@media (max-width: 576px) {
+        .col-md-4 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Инициализация графика температуры
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверяем, есть ли данные для графика
+            const forecastsContainer = document.getElementById('temperatureChart');
+            if (!forecastsContainer) return;
+
+            // Получаем данные из карточек прогноза
+            const forecastCards = document.querySelectorAll('.forecast-card');
+            if (forecastCards.length === 0) return;
+
+            const dates = [];
+            const temps = [];
+            const minTemps = [];
+            const maxTemps = [];
+
+            // Собираем данные из карточек
+            forecastCards.forEach(card => {
+                const dayElement = card.querySelector('.card-header h5');
+                const tempElement = card.querySelector('.temperature-gradient');
+                const minTempElement = card.querySelector('.temp-min');
+                const maxTempElement = card.querySelector('.temp-max');
+
+                if (dayElement && tempElement && minTempElement && maxTempElement) {
+                    dates.push(dayElement.textContent.trim());
+
+                    // Извлекаем температуру из текста
+                    const tempText = tempElement.textContent.trim();
+                    const tempMatch = tempText.match(/(\d+)/);
+                    if (tempMatch) temps.push(parseFloat(tempMatch[1]));
+
+                    // Извлекаем минимальную температуру
+                    const minTempText = minTempElement.textContent.trim();
+                    const minTempMatch = minTempText.match(/(\d+)/);
+                    if (minTempMatch) minTemps.push(parseFloat(minTempMatch[1]));
+
+                    // Извлекаем максимальную температуру
+                    const maxTempText = maxTempElement.textContent.trim();
+                    const maxTempMatch = maxTempText.match(/(\d+)/);
+                    if (maxTempMatch) maxTemps.push(parseFloat(maxTempMatch[1]));
+                }
+            });
+
+            // Если собрали данные, создаем график
+            if (dates.length > 0) {
+                try {
+                    new Chart(forecastsContainer, {
+                        type: 'line',
+                        data: {
+                            labels: dates,
+                            datasets: [
+                                {
+                                    label: 'Средняя температура',
+                                    data: temps,
+                                    borderColor: '#667eea',
+                                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                                    tension: 0.4,
+                                    fill: true,
+                                    borderWidth: 2
+                                },
+                                {
+                                    label: 'Мин. температура',
+                                    data: minTemps,
+                                    borderColor: '#0dcaf0',
+                                    borderDash: [5, 5],
+                                    tension: 0.4,
+                                    fill: false,
+                                    borderWidth: 2
+                                },
+                                {
+                                    label: 'Макс. температура',
+                                    data: maxTemps,
+                                    borderColor: '#fd7e14',
+                                    borderDash: [5, 5],
+                                    tension: 0.4,
+                                    fill: false,
+                                    borderWidth: 2
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                    labels: {
+                                        font: {
+                                            size: 12
+                                        }
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Температура на 7 дней (°C)',
+                                    font: {
+                                        size: 16,
+                                        weight: 'bold'
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: false,
+                                    title: {
+                                        display: true,
+                                        text: 'Температура (°C)'
+                                    },
+                                    ticks: {
+                                        callback: function(value) {
+                                            return value + '°C';
+                                        }
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Дни'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.error('Ошибка создания графика:', error);
+                    forecastsContainer.innerHTML = '<div class="alert alert-info">График временно недоступен</div>';
+                }
+            } else {
+                forecastsContainer.innerHTML = '<div class="alert alert-info">Нет данных для графика</div>';
+            }
+        });
+    </script>
+}
